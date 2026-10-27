@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Análise Estrutural de Cadeira</title>
+<meta name="description" content="Software de Resistência dos Materiais que verifica se uma cadeira suporta o peso de uma pessoa: reações, diagramas N/V/M, tensões, flambagem e relatório PDF.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5fa8'/%3E%3Cpath d='M10 6v20M10 17h12v9M10 17h12' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="static/app.css">
+</head>
+<body>
+<header class="topo">
+  <div class="topo-in">
+    <div class="marca">
+      <svg class="marca-ico" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path d="M10 6v20M10 17h12v9"/></svg>
+      <div>
+        <h1>Análise Estrutural de Cadeira</h1>
+        <p>Resistência dos Materiais · Projeto A3</p>
+      </div>
+    </div>
+    <div class="topo-acoes">
+      <button class="btn-icone" id="tema" type="button" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+      </button>
+      <button class="btn btn-primario" id="abrir-pdf" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+        <span>Relatório PDF</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="grade">
+  <!-- ============================== ENTRADAS ============================== -->
+  <aside class="painel" aria-label="Dados de entrada">
+    <form id="form" novalidate>
+      <section class="grupo">
+        <h2 class="grupo-tit">Usuário</h2>
+        <div class="campo">
+          <label for="massa_kg">Peso da pessoa</label>
+          <div class="entrada"><input id="massa_kg" type="number" step="1" min="1" max="1000"><span>kg</span></div>
+          <input id="massa_range" class="faixa" type="range" min="30" max="300" step="1" aria-label="Peso da pessoa (controle deslizante)">
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2 class="grupo-tit">Dimensões da cadeira</h2>
+        <div class="campo">
+          <label for="altura_mm">Altura do assento <small>H · comprimento das pernas</small></label>
+          <div class="entrada"><input id="altura_mm" type="number" step="10" min="100" max="1500"><span>mm</span></div>
+        </div>
+        <div class="linha2">
+          <div class="campo">
+            <label for="largura_mm">Largura <small>L</small></label>
+            <div class="entrada"><input id="largura_mm" type="number" step="10" min="150" max="1500"><span>mm</span></div>
+          </div>
+          <div class="campo">
+            <label for="profundidade_mm">Profundidade <small>P</small></label>
+            <div class="entrada"><input id="profundidade_mm" type="number" step="10" min="150" max="1500"><span>mm</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2 class="grupo-tit">Material</h2>
+        <div class="campo">
+          <label for="material">Material da estrutura</label>
+          <div class="entrada sel"><select id="material"></select></div>
+          <p class="nota" id="info-material"></p>
+        </div>
+        <div class="linha2" id="bloco-pers" hidden>
+          <div class="campo">
+            <label for="tensao_personalizada_mpa">Tensão limite</label>
+            <div class="entrada"><input id="tensao_personalizada_mpa" type="number" step="5" min="1" max="3000"><span>MPa</span></div>
+          </div>
+          <div class="campo">
+            <label for="e_personalizado_gpa">Módulo E</label>
+            <div class="entrada"><input id="e_personalizado_gpa" type="number" step="1" min="0.1" max="400"><span>GPa</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2 class="grupo-tit">Pernas</h2>
+        <div class="campo">
+          <label for="tipo_secao">Seção transversal</label>
+          <div class="entrada sel"><select id="tipo_secao"></select></div>
+        </div>
+        <div class="linha3">
+          <div class="campo">
+            <label for="espessura_perna_mm" id="rot-b">Lado <small>a</small></label>
+            <div class="entrada"><input id="espessura_perna_mm" type="number" step="1" min="1" max="300"><span>mm</span></div>
+          </div>
+          <div class="campo" id="c-h-perna">
+            <label for="altura_secao_perna_mm">Altura <small>h</small></label>
+            <div class="entrada"><input id="altura_secao_perna_mm" type="number" step="1" min="1" max="300"><span>mm</span></div>
+          </div>
+          <div class="campo" id="c-t-perna">
+            <label for="parede_mm">Parede <small>t</small></label>
+            <div class="entrada"><input id="parede_mm" type="number" step="0.1" min="0.1" max="50"><span>mm</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2 class="grupo-tit">Travessa lateral do assento</h2>
+        <label class="chave">
+          <input id="travessa_igual_perna" type="checkbox">
+          <span class="chave-trilho" aria-hidden="true"></span>
+          <span>Mesma seção das pernas</span>
+        </label>
+        <div id="bloco-trav" hidden>
+          <div class="campo">
+            <label for="tipo_secao_travessa">Seção transversal</label>
+            <div class="entrada sel"><select id="tipo_secao_travessa"></select></div>
+          </div>
+          <div class="linha3">
+            <div class="campo">
+              <label for="b_travessa_mm" id="rot-bt">Largura <small>b</small></label>
+              <div class="entrada"><input id="b_travessa_mm" type="number" step="1" min="1" max="300"><span>mm</span></div>
+            </div>
+            <div class="campo" id="c-h-trav">
+              <label for="h_travessa_mm">Altura <small>h</small></label>
+              <div class="entrada"><input id="h_travessa_mm" type="number" step="1" min="1" max="300"><span>mm</span></div>
+            </div>
+            <div class="campo" id="c-t-trav">
+              <label for="parede_travessa_mm">Parede <small>t</small></label>
+              <div class="entrada"><input id="parede_travessa_mm" type="number" step="0.1" min="0.1" max="50"><span>mm</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <details class="grupo avancado" id="avancado">
+        <summary><span class="grupo-tit">Parâmetros da análise</span><span class="resumo-param" id="resumo-param"></span></summary>
+        <div class="linha2">
+          <div class="campo">
+            <label for="fator_dinamico">Fator dinâmico <small>φ</small></label>
+            <div class="entrada"><input id="fator_dinamico" type="number" step="0.1" min="1" max="5"></div>
+          </div>
+          <div class="campo">
+            <label for="coef_horizontal">Força horizontal <small>μ</small></label>
+            <div class="entrada"><input id="coef_horizontal" type="number" step="0.01" min="0" max="1"></div>
+          </div>
+          <div class="campo">
+            <label for="excentricidade_mm">Excentricidade <small>e, + frente</small></label>
+            <div class="entrada"><input id="excentricidade_mm" type="number" step="10" min="-750" max="750"><span>mm</span></div>
+          </div>
+          <div class="campo">
+            <label for="fator_seguranca">Fator de segurança <small>FS</small></label>
+            <div class="entrada"><input id="fator_seguranca" type="number" step="0.1" min="1" max="10"></div>
+          </div>
+          <div class="campo">
+            <label for="k_flambagem">Flambagem <small>K</small></label>
+            <div class="entrada"><input id="k_flambagem" type="number" step="0.1" min="0.5" max="2.5"></div>
+          </div>
+        </div>
+        <p class="nota">φ amplifica o peso para o impacto ao sentar. F<sub>H</sub> = μ·W simula inclinar-se ou arrastar a cadeira. K = 2,0 corresponde a perna engastada no assento e livre no piso.</p>
+      </details>
+
+      <button class="btn btn-secundario largo" id="restaurar" type="button">Restaurar valores padrão</button>
+    </form>
+  </aside>
+
+  <!-- ============================== RESULTADOS ============================== -->
+  <section class="resultados" aria-live="polite">
+    <div class="veredito" id="veredito" data-estado="carregando">
+      <div class="ver-principal">
+        <div class="ver-selo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="ico-ok"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          <svg viewBox="0 0 24 24" class="ico-falha"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          <svg viewBox="0 0 24 24" class="ico-aviso"><path d="M12 4l9 16H3zM12 10v4m0 3v.5"/></svg>
+        </div>
+        <div class="ver-texto">
+          <p class="ver-rotulo">Resultado da análise</p>
+          <h2 id="ver-titulo">Calculando…</h2>
+          <p id="ver-sub" class="ver-sub"></p>
+        </div>
+        <div class="ver-massa">
+          <p class="ver-rotulo">Massa máxima admissível</p>
+          <p class="ver-num"><span id="massa-max">—</span><small>kg</small></p>
+          <p class="ver-sub" id="massa-crit"></p>
+        </div>
+      </div>
+      <ul class="checks" id="checks"></ul>
+      <ul class="erros" id="erros" hidden></ul>
+    </div>
+
+    <nav class="abas" role="tablist" aria-label="Detalhes">
+      <button role="tab" aria-selected="true" data-aba="modelo" id="tab-modelo">Modelo e reações</button>
+      <button role="tab" aria-selected="false" data-aba="perna" id="tab-perna">Perna</button>
+      <button role="tab" aria-selected="false" data-aba="travessa" id="tab-travessa">Travessa</button>
+      <button role="tab" aria-selected="false" data-aba="tensoes" id="tab-tensoes">Tensões</button>
+      <button role="tab" aria-selected="false" data-aba="memorial" id="tab-memorial">Memorial de cálculo</button>
+    </nav>
+
+    <div class="folha" id="folha">
+      <div class="aba" data-aba="modelo" role="tabpanel" aria-labelledby="tab-modelo">
+        <div class="desenhos">
+          <figure><figcaption>Vista lateral · cargas e reações</figcaption><div id="svg-lateral" class="svgbox"></div></figure>
+          <figure><figcaption>Vista superior · reação em cada perna</figcaption><div id="svg-superior" class="svgbox"></div></figure>
+        </div>
+        <dl class="dados" id="dados-modelo"></dl>
+      </div>
+      <div class="aba" data-aba="perna" role="tabpanel" aria-labelledby="tab-perna" hidden>
+        <p class="aba-intro">Perna mais carregada, engastada no quadro do assento (y = H) e livre no piso (y = 0). Flexo-compressão: σ<sub>máx</sub> = N/A + M/W.</p>
+        <div id="svg-perna" class="svgbox"></div>
+        <dl class="dados" id="dados-perna"></dl>
+      </div>
+      <div class="aba" data-aba="travessa" role="tabpanel" aria-labelledby="tab-travessa" hidden>
+        <p class="aba-intro">Travessa lateral modelada como viga bi-apoiada sobre as pernas, com carga concentrada Q = W/2 (hipótese conservadora).</p>
+        <div id="svg-travessa" class="svgbox"></div>
+        <dl class="dados" id="dados-travessa"></dl>
+      </div>
+      <div class="aba" data-aba="tensoes" role="tabpanel" aria-labelledby="tab-tensoes" hidden>
+        <p class="aba-intro">Tensões normais atuantes comparadas com a tensão admissível σ<sub>adm</sub> = σ<sub>lim</sub> / FS.</p>
+        <div id="svg-tensoes" class="svgbox"></div>
+        <div id="secoes-info" class="secoes"></div>
+      </div>
+      <div class="aba" data-aba="memorial" role="tabpanel" aria-labelledby="tab-memorial" hidden>
+        <div id="memorial"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>Modelo simplificado para fins didáticos: 4 pernas engastadas no quadro do assento, travessas bi-apoiadas, material elástico-linear e peso próprio desprezado. Não substitui ensaios normalizados (ABNT NBR 13962, EN 1728).</p>
+</footer>
+
+<!-- ============================== DIÁLOGO PDF ============================== -->
+<dialog id="dlg-pdf" aria-labelledby="dlg-tit">
+  <form method="dialog" id="form-pdf">
+    <h2 id="dlg-tit">Gerar relatório técnico</h2>
+    <p class="nota">O PDF traz capa, introdução, objetivos, metodologia, memorial de cálculo completo, diagramas e conclusão, com os dados atuais.</p>
+    <div class="campo">
+      <label for="integrantes">Integrantes do grupo <small>um por linha</small></label>
+      <textarea id="integrantes" rows="5" placeholder="Nome completo — RA"></textarea>
+    </div>
+    <div class="campo">
+      <label for="turma">Turma</label>
+      <div class="entrada"><input id="turma" type="text" maxlength="80"></div>
+    </div>
+    <p class="msg-pdf" id="msg-pdf" hidden></p>
+    <div class="dlg-acoes">
+      <button class="btn btn-secundario" value="cancelar" type="submit" formnovalidate>Cancelar</button>
+      <button class="btn btn-primario" id="gerar-pdf" type="button">Baixar PDF</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="static/app.js"></script>
+</body>
+</html>
