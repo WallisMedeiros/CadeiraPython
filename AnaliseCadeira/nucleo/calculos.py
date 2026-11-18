@@ -53,7 +53,7 @@ import numpy as np
 from .materiais import MATERIAIS, Material, material_personalizado
 from .secoes import Secao, criar_secao
 
-G = 9.81  # m/s²
+G = 10.00  # m/s²
 
 
 # --------------------------------------------------------------------------- #
@@ -379,7 +379,7 @@ def _montar_memorial(r: Resultados) -> list[tuple[str, list[Passo]]]:
     # 4. Cargas ---------------------------------------------------------------------
     memorial.append(("4. Carregamento", [
         Passo("Peso estático do usuário", "P₀ = m · g",
-              f"{_f(ent.massa_kg, 1)} · 9,81", f"{_f(r.peso_estatico, 1)} N"),
+              f"{_f(ent.massa_kg, 1)} · 10", f"{_f(r.peso_estatico, 1)} N"),
         Passo("Carga de projeto (com efeito dinâmico)", "W = P₀ · φ",
               f"{_f(r.peso_estatico, 1)} · {_f(ent.fator_dinamico, 2)}", f"{_f(r.W, 1)} N"),
         Passo("Força horizontal no assento", "F_H = μ · W",

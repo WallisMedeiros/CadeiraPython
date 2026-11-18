@@ -30,7 +30,7 @@ def test_secoes():
 def test_caso_padrao_madeira():
     """100 kg, φ = 1,5, μ = 0,10, H = P = 0,40/0,45 m, eucalipto 40×40 mm."""
     r = analisar(Entradas())
-    W = 100 * 9.81 * 1.5                      # 1471,5 N
+    W = 100 * 10.00 * 1.5                      # 1500 N
     assert perto(r.W, W)
     F_H = 0.10 * W
     R_D_tot = (W * 0.2 + F_H * 0.45) / 0.4
